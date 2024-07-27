@@ -8,11 +8,13 @@ function Deck() {
     const [deck, setDeck] = useState(null);
     const [topCard, setTopCard] = useState(null);
     const [shuffling, setShuffling] = useState(false);
+    const [remaining, setRemaining] = useState(52); // Initialize with 52 cards
 
     useEffect(function loadingDeck() {
         async function fetch() {
             const deckData = await axios.get(`${BASE_API_URL}/new/shuffle/`);
             setDeck(deckData.data);
+            setRemaining(52); // Reset remaining cards
         }
         fetch();
     }, []);
@@ -30,6 +32,7 @@ function Deck() {
                 name: card.suit + " " + card.value,
                 image: card.image,
             });
+            setRemaining(res.data.remaining); // Update remaining cards
         } catch (e) {
             alert(e);
         }
@@ -41,6 +44,7 @@ function Deck() {
         try {
             await axios.get(`${BASE_API_URL}/${deck.deck_id}/shuffle/`);
             setTopCard(null); // Reset the top card when shuffling
+            setRemaining(52); // Reset remaining cards
         } catch (e) {
             alert(e);
         } finally {
@@ -62,14 +66,14 @@ function Deck() {
         );
     }
 
-    // Return shuffle button (disabled if already is)
+    // Return shuffle button (disabled if there are remaining cards or if already shuffling)
     function renderShuffleBtn() {
         if (!deck) return null;
         return (
             <button
                 className="Deck-gimme"
                 onClick={isShuffling}
-                disabled={shuffling}>
+                disabled={shuffling || remaining > 1}>
                 SHUFFLE DECK
             </button>
         );
@@ -88,4 +92,5 @@ function Deck() {
 }
 
 export default Deck;
+
 
